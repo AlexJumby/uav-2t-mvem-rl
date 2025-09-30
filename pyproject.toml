@@ -1,0 +1,48 @@
+[tool.poetry]
+name = "uav-2t-mvem-rl"
+version = "0.1.0"
+description = "DDPG/TD3 control for a 2-stroke UAV engine MVEM"
+authors = ["AVNikolaenkov <alexnikolaenkov001@gmail.com>"]
+readme = "README.md"
+packages = [{ include = "engine_rl", from = "src" }]
+
+[tool.poetry.dependencies]
+python = ">=3.11,<3.14"
+numpy = "^2.1.0"
+scipy = "^1.13.0"
+gymnasium = "^0.29.1"
+stable-baselines3 = "^2.3.0"
+matplotlib = "^3.9.0"
+tqdm = "^4.66.0"
+pydantic = "^2.9.0"
+onnx = "^1.16.0"
+onnxruntime = "^1.18.0"
+tensorboard = "^2.20.0"
+
+[tool.poetry.group.dev.dependencies]
+ruff = "^0.6.0"
+black = "^24.8.0"
+mypy = "^1.10.0"
+pytest = "^8.2.0"
+pytest-cov = "^5.0.0"
+pre-commit = "^3.7.0"
+
+[build-system]
+requires = ["poetry-core>=2.0.0,<3.0.0"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.ruff]
+line-length = 100
+lint.select = ["E","F","I","UP","B"]
+lint.ignore = ["E501"]
+
+[tool.black]
+line-length = 100
+
+[tool.pytest.ini_options]
+minversion = "8.0"
+addopts = "-q --cov=engine_rl --cov-report=term-missing"
+
+[tool.mypy]
+python_version = "3.11"
+strict = false
