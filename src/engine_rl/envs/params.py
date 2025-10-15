@@ -6,97 +6,93 @@ from dataclasses import asdict, dataclass, field
 # ---------- Универсальные физические константы ----------
 @dataclass
 class Physical:
-    R: float = 287.05
-    k: float = 1.4
-    Lth: float = 14.7
-    p0: float = 101325.0
-    T0: float = 298.15
-    g: float = 9.80665
+    R: float = 287.05  # J/(kg·K) газовая постоянная для воздуха
+    k: float = 1.4  # Cp/Cv для воздуха
+    Lth: float = 14.7  # стехиометрический AFR (массовый) для бензина
+    p0: float = 101325.0  # Па, атмосферное давление
+    T0: float = 298.15  # K, температура окружающей среды (25 °C)
+    g: float = 9.80665  # м/с², ускорение свободного падения
 
 
 # ---------- Сетка времени ----------
 @dataclass
 class Timing:
-    dt: float = 0.01
-    inj_delay_steps: int = 2
-    episode_seconds: float = 10.0
+    dt: float = 0.01  # с, шаг интегрирования
+    inj_delay_steps: int = 2  # задержка впрыска в шагах
+    episode_seconds: float = 10.0  # длительность эпизода по умолчанию
 
 
 # ---------- Геометрия ----------
 @dataclass
 class Geometry:
-    Vm: float = 1.0e-3
-    Vz: float = 6.0e-4
-    D: float = 0.036
-    Vd: float = 5.7e-5
-    i: int = 1
-    t: int = 2
+    Vm: float = 1.0e-3  # м^3, объём ВПУСКНОГО КОЛЛЕКТОРА (используется в dp_m)
+    Vz: float = 6.0e-4  # м^3, «камера/картер» (для 2Т — объём под поршнем), если понадобится
+    D: float = 0.036  # м, диаметр цилиндра
+    Vd: float = 5.7e-5  # м^3, объём цилиндра (рабочий объём)
+    i: int = 1  # число цилиндров
+    t: int = 2  # число тактов (2-тактный двигатель)
 
 
 # ---------- Дроссель ----------
 @dataclass
 class Throttle:
-    mat1: float = 1.0
-    a1: float = 1.4073
-    a2: float = 0.4087
-    p1: float = 0.4404
-    p2: float = 2.3143
-    pn: float = 0.7404
-    pc: float = 0.4125
+    mat1: float = 1.0  # кг/(с·Па^0.5), масштаб в (2)
+    a1: float = 1.4073  # коэф. в формуле (3)
+    a2: float = 0.4087  # коэф. в формуле (3)
+    p1: float = 0.4404  # коэф. в формуле (4)
+    p2: float = 2.3143  # коэф. в формуле (4)
+    pn: float = 0.7404  # коэф. в формуле (4)
+    pc: float = 0.4125  # критическое отношение давлений (формула (4))
 
 
 # ---------- Порт (Hendricks) ----------
 @dataclass
 class PortFlow:
-    n_unit: str = "rpm"
-    pm_unit: str = "bar"
-    c0: float = -0.366
-    c1: float = 0.08979
-    c2: float = -0.0337
-    c3: float = 0.0001
+    n_unit: str = "rpm"  # какие единицы ожидает регрессия по n: "rpm" или "krpm"
+    pm_unit: str = "bar"  # какие единицы ожидает регрессия по p_m: "bar" или "Pa"
+    c0: float = -0.366  # коэф. в формуле (6)
+    c1: float = 0.08979  # коэф. в формуле (6)
+    c2: float = -0.0337  # коэф. в формуле (6)
+    c3: float = 0.0001  # коэф. в формуле (6)
 
 
 # ---------- Плёночная модель ----------
 @dataclass
 class FuelFilm:
-    use_regressions: bool = True
-    tau_ff_const: float = 0.6
-    x_const: float = 0.4
+    use_regressions: bool = True  # пока используем константы; позже можно ввести зависимости
+    tau_ff_const: float = 0.6  # с, постоянная времени плёночной модели (Aquino)
+    x_const: float = 0.4  # доля мгновенного испарения
 
 
 # ---------- Вал / мощности ----------
 @dataclass
 class Shaft:
-    J: float = 0.015
-    Hu: float = 43e6
-    kf: float = 0.05
-    eta_i: float = 0.25  # <-- добавили сюда
-    hiu: float = 0.98
+    J: float = 0.015  # кг·м², момент инерции вращающихся масс
+    Hu: float = 43e6  # Дж/кг, удельная теплота сгорания топлива
+    kf: float = 0.05  # долю потерь/продувки топлива (безразмерная)
+    eta_i: float = 0.25  # <-- добавили сюда -# КПД двигателя (внутренний)
+    hiu: float = 0.98  # КПД топливной системы (впрыска)
 
 
 @dataclass
 class ShaftLoss:
-    c0: float = 0.1  # Н*м эквивалент (через перевод в мощность выйдет Вт); подберём
-    c1: float = 0.02  # Н*м·с
-    c2: float = 2e-5  # Н*м·с^2
-    k_pump: float = 0.5  # безразмерный масштаб для P_p
-
-
-# в MVEMParams:
-loss: ShaftLoss = field(default_factory=ShaftLoss)
+    c0: float = 0.1  # Н*м сухое трение (эквивалент)
+    c1: float = 0.02  # Н*м·с — вязкое трение
+    c2: float = 2e-5  # Н*м·с^2 — квадратичные потери (аэродин., накачка)
+    k_pump: float = 0.5  # безразмерный масштаб мощности «помпы»
 
 
 # ---------- Ограничения ----------
 @dataclass
 class Limits:
-    n_min_rpm: float = 100.0
-    n_max_rpm: float = 9000.0
-    a_min: float = 0.0
-    a_max: float = 1.0
-    mfi_min: float = 0.0
-    mfi_max: float = 3.0e-3
-    lambda_min: float = 0.6
-    lambda_max: float = 1.6
+    n_min_rpm: float = 100.0  # минимальная скорость вращения в rpm
+    n_max_rpm: float = 9000.0  # максимальная скорость вращения в rpm
+    a_min: float = 0.0  # минимальное положение дросселя
+    a_max: float = 1.0  # максимальное положение дросселя
+    mfi_min: float = 1.0e-3  # кг/с — реалистичный низ (ориентир по практике/статье)
+    mfi_max: float = 5.0e-3  # кг/с — реалистичный верх
+    lambda_min: float = 0.6  # минимальное значение λ
+    lambda_max: float = 1.6  # максимальное значение λ
 
 
 # ---------- Домрандомизация ----------
@@ -113,9 +109,9 @@ class DomainRand:
 # ---------- Стартовые условия ----------
 @dataclass
 class Operating:
-    n0_rps: float = 300.0  # стартовая «скорость» в rps (эквивалент)
+    n0_rps: float = 5000.0 / 60.0  # ≈83.33 rps (≈5000 rpm)
     a0: float = 0.4  # стартовый дроссель
-    lambda0: float = 1.0
+    lambda0: float = 1.0  # стартовая AFR
 
 
 # ---------- Групповой контейнер ----------
